@@ -48,14 +48,14 @@ def create_dataset(n_train, n_test, min_len, max_len):
 
     return list(X_train), list(y_train), list(X_test), list(y_test)
 
-X_train, y_train, X_test, y_test = create_dataset(60000,10000,3,16)
+X_train, y_train, X_test, y_test = create_dataset(60000,10000,3,15)
 
 vocab = list(string.ascii_lowercase)
 char_to_int = {ch: i + 1 for i, ch in enumerate(vocab)}
 int_to_char = {i: ch for ch, i in char_to_int.items()}
 
-X_train_encoded = encode_words(X_train, char_to_int, 16)
-X_test_encoded = encode_words(X_test, char_to_int, 16)
+X_train_encoded = encode_words(X_train, char_to_int, 15)
+X_test_encoded = encode_words(X_test, char_to_int, 15)
 
 y_train = list(y_train)
 y_test = list(y_test)
@@ -69,7 +69,7 @@ y_test = np.array(y_test, dtype=np.float32)
 vocab_size = len(char_to_int) + 1  # +1 for padding (0)
 
 model = tf.keras.Sequential([
-    tf.keras.layers.Embedding(input_dim=vocab_size, output_dim=16, input_length=16),
+    tf.keras.layers.Embedding(input_dim=vocab_size, output_dim=15, input_length=15),
     tf.keras.layers.LSTM(64),
     tf.keras.layers.Dropout(0.5),
     tf.keras.layers.Dense(1, activation='sigmoid')
@@ -77,7 +77,7 @@ model = tf.keras.Sequential([
 
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-model.fit(X_train_encoded, y_train, epochs=15, batch_size=32, validation_data=(X_test_encoded, y_test))
+model.fit(X_train_encoded, y_train, epochs=30, batch_size=32, validation_data=(X_test_encoded, y_test))
 
 loss, accuracy = model.evaluate(X_test_encoded, y_test)
 print(f"Test Accuracy: {accuracy: .4f}")
