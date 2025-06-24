@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import SimpleRNN, Dropout, Dense
+from tensorflow.keras.layers import LSTM, Dropout, Dense
 
 df = pd.read_csv('GOOGL.csv')
 df['Date'] = pd.to_datetime(df['Date'])
@@ -12,7 +12,7 @@ df = df.sort_values('Date')
 features = ['Open', 'High', 'Low', 'Close', 'Volume']
 data = df[features]
 
-sequence_length = 60
+sequence_length = 120
 training_size = int(len(data) * 0.8)
 
 train_data = data.iloc[:training_size]
@@ -39,9 +39,9 @@ for i in range(sequence_length, len(scaled_test)):
 x_test, y_test = np.array(x_test), np.array(y_test)
 
 model = Sequential([
-    SimpleRNN(128, return_sequences=True, input_shape=(x_train.shape[1], x_train.shape[2])),
-    SimpleRNN(64),
-    Dropout(0.5),
+    LSTM(128, return_sequences=True, input_shape=(x_train.shape[1], x_train.shape[2])),
+    LSTM(64),
+    Dropout(0.3),
     Dense(1)
 ])
 
@@ -68,7 +68,7 @@ print(f'RMSE: {rmse:.2f}')
 plt.figure(figsize=(14,6))
 plt.plot(y_test_rescaled, label='Actual Price')
 plt.plot(predictions_rescaled, label='Predicted Price')
-plt.title('GOOG Stock Price Prediction (LSTM)')
+plt.title('GOOGL Stock Price Prediction (LSTM)')
 plt.xlabel('Time')
 plt.ylabel('Price')
 plt.legend()

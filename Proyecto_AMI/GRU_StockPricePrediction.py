@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import SimpleRNN, Dropout, Dense
+from tensorflow.keras.layers import GRU, Dropout, Dense
 
 df = pd.read_csv('GOOGL.csv')
 df['Date'] = pd.to_datetime(df['Date'])
@@ -39,8 +39,8 @@ for i in range(sequence_length, len(scaled_test)):
 x_test, y_test = np.array(x_test), np.array(y_test)
 
 model = Sequential([
-    SimpleRNN(128, return_sequences=True, input_shape=(x_train.shape[1], x_train.shape[2])),
-    SimpleRNN(64),
+    GRU(128, return_sequences=True, input_shape=(x_train.shape[1], x_train.shape[2])),
+    GRU(64),
     Dropout(0.5),
     Dense(1)
 ])
