@@ -190,11 +190,11 @@ plt.show()
 > GRU often outperformed LSTM in this project, giving more stable predictions with less training time.
 
 # RNN
-![RNN Prediction](images/RNN_133.69.jpeg)
+![RNN Prediction](images/RNN_170.30.jpg)
 # LSTM
-![LSTM Prediction](images/LSTM_162.84.jpeg)
+![LSTM Prediction](images/LSTM_162.84.jpg)
 # GRU
-![GRU Prediction](images/GRU_55.98.jpeg)
+![GRU Prediction](images/GRU_55.98.jpg)
 
 ---
 
