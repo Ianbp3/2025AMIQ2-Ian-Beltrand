@@ -192,7 +192,7 @@ plt.show()
 # RNN
 ![RNN Prediction](images/RNN_170.30.jpg)
 # LSTM
-![LSTM Prediction](images/LSTM_162.84.jpg)
+![LSTM Prediction](images/LSTM_162.84.jpeg)
 # GRU
 ![GRU Prediction](images/GRU_55.98.jpg)
 
