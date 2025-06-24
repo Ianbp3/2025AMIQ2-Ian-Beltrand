@@ -185,7 +185,7 @@ plt.show()
 |-----------|----------------------------------|---------------------------|----------------|
 | RNN       | Basic recurrent network         | Simple, fast              | ~133.69           |
 | LSTM      | Long Short-Term Memory          | Better for long sequences | ~162.84         |
-| GRU       | Gated Recurrent Unit            | Fast, accurate            | ~73.44 ✅       |
+| GRU       | Gated Recurrent Unit            | Fast, accurate            | ~55.98 ✅       |
 
 > GRU often outperformed LSTM in this project, giving more stable predictions with less training time.
 
@@ -194,7 +194,7 @@ plt.show()
 # LSTM
 ![LSTM Prediction](images/LSTM_162.84.jpeg)
 # GRU
-![GRU Prediction](images/GRU_73.44.jpeg)
+![GRU Prediction](images/GRU_55.98.jpeg)
 
 ---
 
