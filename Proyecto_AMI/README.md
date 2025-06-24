@@ -13,22 +13,19 @@ This project aims to predict future stock prices using Recurrent Neural Networks
 - **Matplotlib / Seaborn**: For data visualization.
 
 ### Current Dataset:
-The stock data could be fetched from here https://media.geeksforgeeks.org/wp-content/uploads/20250408133653340682/all_stocks_5yr.csv . The dataset include daily stock prices and key indicators like the following:
+The stock data could be fetched from here https://www.kaggle.com/datasets/varpit94/google-stock-data?select=GOOGL.csv . The dataset include daily stock prices and key indicators like the following:
 - **Open**: The price of the stock at market open.
 - **Close**: The price of the stock at market close.
 - **High**: The highest price reached during the trading day.
 - **Low**: The lowest price reached during the trading day.
 - **Volume**: The number of shares traded on a particular day.
 
-#### Dataset Change Notice:
-While the project currently plans to use a general stock market dataset, there is a possibility that the dataset will be changed to something more specific in the future (e.g., a particular stock, industry, or region). This will be updated as the project progresses.
-
 ## Objective
 The goal is to train a model that can predict the **closing price** of a stock for the next day based on the previous day's data. We aim to explore the following tasks:
 - **Preprocessing the dataset**: Normalization, handling missing data, and feature engineering.
 - **Building an RNN model**: Initial tests with basic RNN architecture in TensorFlow.
 - **Evaluating performance**: Using metrics such as Mean Absolute Error (MAE) or Root Mean Squared Error (RMSE).
-- **Transitioning to LSTM models**: To handle longer sequences and improve accuracy.
+- **Transitioning to LSTM and GRU models**: To handle longer sequences and improve accuracy.
 
 ## Stock Market Data Explanation
 Stock market data generally includes several columns, each representing a specific aspect of the trading day:
@@ -60,26 +57,156 @@ Long Short-Term Memory (LSTM) networks are a special type of RNN that are partic
 
 In future iterations of this project, we will experiment with LSTM models to see if they improve the accuracy of stock price predictions.
 
-## Potential Project Steps
+## Model Scripts Description
 
-### 1. Data Collection:
-   - Gather historical stock data (open, close, high, low, volume).
-   - Clean and preprocess the data (handle missing values, normalize features).
+All StockPricePrediction models have basically the same structure, the only change between them are the layers that form the model.
 
-### 2. Feature Engineering:
-   - Choose relevant features (e.g., moving averages, technical indicators) to help improve model performance.
+## 🧠 Model Variants
 
-### 3. Build RNN Model:
-   - Create an RNN model using TensorFlow/Keras to predict future stock prices based on previous data.
-   - Experiment with hyperparameters like the number of layers, hidden units, and sequence length.
+Each script follows the same data processing pipeline, and only differs in the type of recurrent layers used:
 
-### 4. Train the Model:
-   - Train the RNN model using the training dataset.
-   - Use validation data to tune the model and prevent overfitting.
+| Script               | Layer Type   |
+|----------------------|--------------|
+| `RNN_StockPricePrediction.py`   | `SimpleRNN`  |
+| `LSTM_StockPricePrediction.py`  | `LSTM`       |
+| `GRU_StockPricePrediction.py`   | `GRU`        |
 
-### 5. Evaluate the Model:
-   - Use error metrics like Mean Squared Error (MSE) or Mean Absolute Error (MAE) to evaluate the model's performance.
+---
 
-### 6. Transition to LSTM:
-   - Replace the RNN with an LSTM network to improve the model’s ability to capture long-term dependencies in stock price data.
+## 🧪 Features & Data
 
+- Dataset: `GOOGL.csv` (historical stock prices)
+- Input features: `Open`, `High`, `Low`, `Close`, `Volume`
+- Sequence length: 60 days (lookback window) (120 for LSTM)
+- Split: 80% training / 20% testing
+- Scaling: `MinMaxScaler` (fitted only on training data)
+
+---
+
+## 📦 Dependencies
+
+Make sure you have the following libraries installed:
+
+```bash
+pip install numpy pandas matplotlib scikit-learn tensorflow
+```
+
+---
+
+## 🛠 How It Works
+
+### 🔹 Data Preprocessing
+
+```python
+df = pd.read_csv('GOOGL.csv')
+df['Date'] = pd.to_datetime(df['Date'])
+df = df.sort_values('Date')
+
+features = ['Open', 'High', 'Low', 'Close', 'Volume']
+data = df[features]
+
+scaler = MinMaxScaler()
+scaler.fit(data[:training_size])
+
+scaled_train = scaler.transform(data[:training_size])
+scaled_test = scaler.transform(data[training_size - sequence_length:])
+```
+
+### 🔹 Sequence Generation
+
+```python
+for i in range(sequence_length, len(scaled_train)):
+    x_train.append(scaled_train[i-sequence_length:i])
+    y_train.append(scaled_train[i, features.index('Close')])
+```
+
+---
+
+## 🔍 GRU Model Example
+
+```python
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import GRU, Dropout, Dense
+
+model = Sequential([
+    GRU(128, return_sequences=True, input_shape=(x_train.shape[1], x_train.shape[2])),
+    GRU(64),
+    Dropout(0.5),
+    Dense(1)
+])
+
+model.compile(optimizer='adam', loss='mean_squared_error')
+model.fit(x_train, y_train, epochs=30, batch_size=32)
+```
+
+---
+
+## 📈 Prediction & Evaluation
+
+```python
+predictions = model.predict(x_test)
+
+# Inverse transform for readable prices
+close_index = features.index('Close')
+pred_full = np.zeros((len(predictions), len(features)))
+true_full = np.zeros((len(y_test), len(features)))
+
+pred_full[:, close_index] = predictions[:, 0]
+true_full[:, close_index] = y_test
+
+predictions_rescaled = scaler.inverse_transform(pred_full)[:, close_index]
+y_test_rescaled = scaler.inverse_transform(true_full)[:, close_index]
+
+# RMSE
+rmse = np.sqrt(np.mean((predictions_rescaled - y_test_rescaled) ** 2))
+print(f'RMSE: {rmse:.2f}')
+```
+
+---
+
+## 📊 Results Visualization
+
+```python
+plt.figure(figsize=(14,6))
+plt.plot(y_test_rescaled, label='Actual Price')
+plt.plot(predictions_rescaled, label='Predicted Price')
+plt.title('GOOG Stock Price Prediction')
+plt.xlabel('Time')
+plt.ylabel('Price')
+plt.legend()
+plt.show()
+```
+
+---
+
+## 🏁 Results & Comparison
+
+| Model     | Description                     | Pros                     | RMSE        |
+|-----------|----------------------------------|---------------------------|----------------|
+| RNN       | Basic recurrent network         | Simple, fast              | ~133.69           |
+| LSTM      | Long Short-Term Memory          | Better for long sequences | ~162.84         |
+| GRU       | Gated Recurrent Unit            | Fast, accurate            | ~73.44 ✅       |
+
+> GRU often outperformed LSTM in this project, giving more stable predictions with less training time.
+
+# RNN
+![RNN Prediction](images/RNN_133.69.jpeg)
+# LSTM
+![LSTM Prediction](images/LSTM_162.84.jpeg)
+# GRU
+![GRU Prediction](images/GRU_73.44.jpeg)
+
+---
+
+## 📌 Future Improvements
+
+- Add technical indicators (e.g., RSI, MACD)
+- Use Transformer-based models
+- Incorporate multiple stocks or external economic data
+- Hyperparameter tuning via Optuna or Keras Tuner
+
+---
+
+## ✨ Author
+
+Made with 💡 by IAN BELTRAND.
